@@ -1,4 +1,4 @@
-use std::{env, fs, process};
+use std::{env, process};
 
 use formatjson::{self, FormatJsonError};
 
@@ -13,32 +13,19 @@ fn main() {
         process::exit(2);
     });
 
-    let formatted_json = formatjson::format_json_file(&filepath);
-    let formatted_json = match formatted_json {
-        Ok(json) => json,
-        Err(err) => {
-            match err {
-                FormatJsonError::FileNotFound => {
-                    eprintln!("Error: File {} not found", filepath)
-                }
-                FormatJsonError::InvalidSyntax(byte_offset, char) => {
-                    eprintln!("Error: Invalid syntax on byte {} ({:?})", byte_offset, char)
-                }
-                _ => {
-                    eprintln!("Error: {}", err.to_string())
-                }
+    if let Err(err) = formatjson::format_json_file(&filepath) {
+        match err {
+            FormatJsonError::FileNotFound => {
+                eprintln!("Error: File {} not found", filepath)
             }
-            process::exit(1);
+            FormatJsonError::InvalidSyntax(byte_offset, char) => {
+                eprintln!("Error: Invalid syntax on byte {} ({:?})", byte_offset, char)
+            }
+            _ => {
+                eprintln!("Error: {}", err.to_string())
+            }
         }
-    };
-
-    // Write the formatted json to the same file.
-    if fs::write(&filepath, formatted_json).is_err() {
-        eprintln!(
-            "Error: Failed to write formatted JSON back to the file: {}",
-            filepath
-        );
-        process::exit(3);
+        process::exit(1);
     }
 
     eprintln!("Successfully formatted {}", filepath);
