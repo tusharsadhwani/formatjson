@@ -1,6 +1,10 @@
 use std::{env, process};
 
-use formatjson::{self, FormatJsonError};
+use formatjson;
+
+const BOLD_RED: &str = "\x1b[1;32m";
+const BOLD_GREEN: &str = "\x1b[1;32m";
+const NORMAL: &str = "\x1b[m";
 
 fn main() {
     let mut args = env::args();
@@ -13,20 +17,9 @@ fn main() {
         process::exit(2);
     });
 
-    if let Err(err) = formatjson::format_json_file(&filepath) {
-        match err {
-            FormatJsonError::FileNotFound => {
-                eprintln!("Error: File {} not found", filepath)
-            }
-            FormatJsonError::InvalidSyntax(byte_offset, char) => {
-                eprintln!("Error: Invalid syntax on byte {} ({:?})", byte_offset, char)
-            }
-            _ => {
-                eprintln!("Error: {}", err.to_string())
-            }
-        }
+    if let Err(error) = formatjson::format_json_file(&filepath) {
+        eprintln!("{}Error:{} {}", BOLD_RED, NORMAL, error);
         process::exit(1);
     }
-
-    eprintln!("Successfully formatted {}", filepath);
+    eprintln!("{}Success:{} formatted {}", BOLD_GREEN, NORMAL, filepath);
 }

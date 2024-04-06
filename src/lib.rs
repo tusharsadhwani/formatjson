@@ -12,22 +12,22 @@ pub mod tokenizer;
 
 #[derive(Error, Debug)]
 pub enum FormatJsonError {
-    #[error("File not found")]
-    FileNotFound,
-    #[error("IO Error {0}")]
+    #[error("File {0} not found")]
+    FileNotFound(String),
+    #[error("{0}")]
     IOError(#[from] io::Error),
-    #[error("Input file had invalid JSON")]
+    #[error("Invalid syntax on byte {0} ({1:?})")]
     InvalidSyntax(usize, char),
-    #[error("Unknown error")]
-    Unknown,
+    #[error("{0}")]
+    Unknown(String),
 }
 
 pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
     let json = fs::read_to_string(&filepath).map_err(|err| {
         if err.kind() == io::ErrorKind::NotFound {
-            return FormatJsonError::FileNotFound;
+            return FormatJsonError::FileNotFound(filepath.to_string());
         }
-        return FormatJsonError::Unknown;
+        return FormatJsonError::Unknown(err.to_string());
     })?;
 
     let tokens = tokenizer::tokenize(&json)?;
