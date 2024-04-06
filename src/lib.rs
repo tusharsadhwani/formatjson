@@ -36,11 +36,13 @@ pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
     for formatted_token in formatter {
         file.write(formatted_token.as_bytes())?;
     }
+    file.write(b"\n")?;
     Ok(())
 }
 
 pub fn format_json(contents: &str) -> Result<String, FormatJsonError> {
     let tokens = tokenizer::tokenize(contents)?;
-    let formatted_string = TokenFormatter::new(tokens.into_iter()).collect();
+    let mut formatted_string: String = TokenFormatter::new(tokens.into_iter()).collect();
+    formatted_string.push('\n');
     return Ok(formatted_string);
 }

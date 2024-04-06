@@ -81,6 +81,17 @@ impl<'a> Tokenizer<'a> {
                     chars.nth(number_token.len() - 2);
                 }
                 continue;
+            } else if "tfn".contains(char) {
+                let special_token = self
+                    .extract_boolean_or_null(byte_offset)
+                    .ok_or(FormatJsonError::InvalidSyntax(byte_offset, char))?;
+                tokens.push(Token {
+                    token_type: TokenType::Number(special_token),
+                    byte_offset,
+                });
+                // consume the extra tokens, till the end of the number
+                chars.nth(special_token.len() - 2);
+                continue;
             }
 
             if " \n\t".contains(char) {
@@ -123,6 +134,7 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn extract_string(&mut self, index: usize) -> Option<&'a str> {
+        // TODO: support `\"` quote escapes
         let slice = self.source.get(index + 1..)?;
         slice
             .find('"')
@@ -130,6 +142,7 @@ impl<'a> Tokenizer<'a> {
             .map(|end| &self.source[index..=end])
     }
     fn extract_number(&mut self, index: usize) -> Option<&'a str> {
+        // TODO: support minus, one decimal point, and exponent notation
         let slice = self.source.get(index + 1..)?;
         slice
             .find(|char| {
@@ -141,6 +154,20 @@ impl<'a> Tokenizer<'a> {
             })
             .map(|i| i + index + 1)
             .map(|end| &self.source[index..end])
+    }
+    fn extract_boolean_or_null(&mut self, index: usize) -> Option<&'a str> {
+        let slice = self.source.get(index..)?;
+        if slice.get(..4)? == "true" {
+            return Some("true");
+        }
+        if slice.get(..5)? == "false" {
+            return Some("false");
+        }
+        if slice.get(..4)? == "null" {
+            return Some("null");
+        }
+
+        return None;
     }
 }
 
