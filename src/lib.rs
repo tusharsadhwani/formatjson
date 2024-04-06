@@ -16,14 +16,14 @@ pub enum FormatJsonError {
 }
 
 pub fn format_json_file(filepath: &str) -> Result<String, FormatJsonError> {
-    fs::read_to_string(&filepath)
-        .map(|json| format_json(&json))
-        .map_err(|err| {
-            if err.kind() == io::ErrorKind::NotFound {
-                return FormatJsonError::FileNotFound;
-            }
-            return FormatJsonError::Unknown;
-        })?
+    let json = fs::read_to_string(&filepath).map_err(|err| {
+        if err.kind() == io::ErrorKind::NotFound {
+            return FormatJsonError::FileNotFound;
+        }
+        return FormatJsonError::Unknown;
+    })?;
+
+    format_json(&json)
 }
 
 pub fn format_json(contents: &str) -> Result<String, FormatJsonError> {

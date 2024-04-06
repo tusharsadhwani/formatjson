@@ -1,4 +1,4 @@
-use std::{env, process};
+use std::{env, fs, process};
 
 use formatjson::{self, FormatJsonError};
 
@@ -14,10 +14,8 @@ fn main() {
     });
 
     let formatted_json = formatjson::format_json_file(&filepath);
-    match formatted_json {
-        Ok(json) => {
-            eprintln!("{}", json);
-        }
+    let formatted_json = match formatted_json {
+        Ok(json) => json,
         Err(err) => {
             match err {
                 FormatJsonError::FileNotFound => {
@@ -33,4 +31,15 @@ fn main() {
             process::exit(1);
         }
     };
+
+    // Write the formatted json to the same file.
+    if fs::write(&filepath, formatted_json).is_err() {
+        eprintln!(
+            "Error: Failed to write formatted JSON back to the file: {}",
+            filepath
+        );
+        process::exit(3);
+    }
+
+    eprintln!("Successfully formatted {}", filepath);
 }
