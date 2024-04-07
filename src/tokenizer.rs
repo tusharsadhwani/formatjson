@@ -147,12 +147,18 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn extract_string(&mut self, index: usize) -> Option<&'a str> {
-        // TODO: support `\"` quote escapes
-        let slice = self.source.get(index + 1..)?;
-        slice
-            .find('"')
-            .map(|i| i + index + 1)
-            .map(|end| &self.source[index..=end])
+        let mut chars = self.source.bytes().enumerate().skip(index + 1);
+        while let Some((i, char)) = chars.next() {
+            if char == b'\\' {
+                // skip the next character
+                chars.next();
+            } else if char == b'"' {
+                // found the closing quote. Return string.
+                return Some(&self.source[index..=i]);
+            }
+        }
+
+        return None;
     }
     fn extract_number(&mut self, index: usize) -> Option<&'a str> {
         // TODO: support minus, one decimal point, and exponent notation

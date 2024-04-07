@@ -6,7 +6,7 @@
     34,
     false,
     {
-      "x": "some long string with\ta few escapes.\n"
+      "x": "long string with\t\"a \nfew escapes.\\"
     }
   ],
   "specials": [
