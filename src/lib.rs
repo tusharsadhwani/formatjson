@@ -15,6 +15,7 @@ use token_formatter::TokenFormatter;
 pub mod errors;
 pub mod token_formatter;
 pub mod tokenizer;
+pub mod validator;
 
 /// Reads, formats, and overwrites the given JSON file.
 ///
