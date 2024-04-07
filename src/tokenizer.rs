@@ -155,25 +155,27 @@ impl<'a> Tokenizer<'a> {
                 chars.next();
             } else if char == '"' {
                 // found the closing quote. Return string.
-                return Some(&self.source[index..=index + 1 + i]);
+                let end_quote_index = index + 1 + i;
+                return Some(&self.source[index..=end_quote_index]);
             }
         }
 
         return None;
     }
     fn extract_number(&mut self, index: usize) -> Option<&'a str> {
-        // TODO: support minus, one decimal point, and exponent notation
         let slice = self.source.get(index + 1..)?;
         slice
             .find(|char| {
-                if let '1'..='9' = char {
+                if let '1'..='9' | '-' | '.' | 'e' | 'E' = char {
                     return false;
-                } else {
-                    return true;
                 }
+                // unknown character: found the end of the number
+                return true;
             })
-            .map(|i| i + index + 1)
-            .map(|end| &self.source[index..end])
+            .map(|i| index + 1 + i)
+            // end_index is the character that's not part of the number.
+            // so the slice will not include it.
+            .map(|end_index| &self.source[index..end_index])
     }
     fn extract_boolean_or_null(&mut self, index: usize) -> Option<&'a str> {
         let slice = self.source.get(index..)?;
