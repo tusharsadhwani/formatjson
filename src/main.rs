@@ -8,6 +8,7 @@ const BOLD_RED: &str = "\x1b[1;31m";
 const BOLD_GREEN: &str = "\x1b[1;32m";
 const NORMAL: &str = "\x1b[m";
 
+/// Reads a filepath argument, and validates and formats the JSON file in-place.
 fn main() -> Result<()> {
     let mut args = env::args();
 

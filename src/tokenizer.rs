@@ -1,7 +1,9 @@
+//! Tokenizes a given JSON string, without validating its syntax.
 use std::fmt::Display;
 
 use crate::errors;
 
+/// The kinds of tokens produced by the tokenizer.
 #[derive(Debug)]
 pub enum TokenType<'a> {
     String(&'a str),
@@ -16,6 +18,7 @@ pub enum TokenType<'a> {
     Colon,
 }
 
+/// Tokens produced by the tokenizer.
 #[derive(Debug)]
 pub struct Token<'a> {
     pub token_type: TokenType<'a>,
@@ -50,20 +53,20 @@ impl<'a> Tokenizer<'a> {
         Self { source, filepath }
     }
 
-    fn tokenize(&mut self) -> Result<Vec<Token<'a>>, errors::FormatJsonError> {
+    fn tokenize(&self) -> Result<Vec<Token<'a>>, errors::FormatJsonError> {
         let mut chars = self.source.char_indices();
         let mut tokens = vec![];
 
         while let Some((byte_offset, char)) = chars.next() {
             // special cases first: strings and numbers
             if char == '"' {
-                let string_token =
-                    self.extract_string(byte_offset)
-                        .ok_or(errors::InvalidSyntax::new(
-                            self.filepath.to_string(),
-                            self.source,
-                            byte_offset.into(),
-                        ))?;
+                let string_token = self.extract_string(byte_offset).ok_or(
+                    errors::InvalidSyntaxDiagnostic::new(
+                        self.filepath.to_string(),
+                        self.source,
+                        byte_offset.into(),
+                    ),
+                )?;
                 tokens.push(Token {
                     token_type: TokenType::String(string_token),
                     byte_offset,
@@ -74,13 +77,13 @@ impl<'a> Tokenizer<'a> {
                 chars.nth(string_token.chars().count() - 2);
                 continue;
             } else if let '1'..='9' | '-' = char {
-                let number_token =
-                    self.extract_number(byte_offset)
-                        .ok_or(errors::InvalidSyntax::new(
-                            self.filepath.to_string(),
-                            self.source,
-                            byte_offset.into(),
-                        ))?;
+                let number_token = self.extract_number(byte_offset).ok_or(
+                    errors::InvalidSyntaxDiagnostic::new(
+                        self.filepath.to_string(),
+                        self.source,
+                        byte_offset.into(),
+                    ),
+                )?;
                 tokens.push(Token {
                     token_type: TokenType::Number(number_token),
                     byte_offset,
@@ -91,13 +94,13 @@ impl<'a> Tokenizer<'a> {
                 }
                 continue;
             } else if "tfn".contains(char) {
-                let special_token =
-                    self.extract_boolean_or_null(byte_offset)
-                        .ok_or(errors::InvalidSyntax::new(
-                            self.filepath.to_string(),
-                            self.source,
-                            byte_offset.into(),
-                        ))?;
+                let special_token = self.extract_boolean_or_null(byte_offset).ok_or(
+                    errors::InvalidSyntaxDiagnostic::new(
+                        self.filepath.to_string(),
+                        self.source,
+                        byte_offset.into(),
+                    ),
+                )?;
                 tokens.push(Token {
                     token_type: TokenType::Number(special_token),
                     byte_offset,
@@ -141,7 +144,7 @@ impl<'a> Tokenizer<'a> {
                 })
             } else {
                 return Err(errors::FormatJsonError::InvalidSyntax(
-                    errors::InvalidSyntax::new(
+                    errors::InvalidSyntaxDiagnostic::new(
                         self.filepath.to_string(),
                         self.source,
                         byte_offset.into(),
@@ -152,7 +155,7 @@ impl<'a> Tokenizer<'a> {
         Ok(tokens)
     }
 
-    fn extract_string(&mut self, index: usize) -> Option<&'a str> {
+    fn extract_string(&self, index: usize) -> Option<&'a str> {
         let slice = self.source.get(index + 1..)?;
         let mut chars = slice.char_indices();
         while let Some((i, char)) = chars.next() {
@@ -168,7 +171,7 @@ impl<'a> Tokenizer<'a> {
 
         return None;
     }
-    fn extract_number(&mut self, index: usize) -> Option<&'a str> {
+    fn extract_number(&self, index: usize) -> Option<&'a str> {
         let slice = self.source.get(index + 1..)?;
         slice
             .find(|char| {
@@ -183,7 +186,7 @@ impl<'a> Tokenizer<'a> {
             // so the slice will not include it.
             .map(|end_index| &self.source[index..end_index])
     }
-    fn extract_boolean_or_null(&mut self, index: usize) -> Option<&'a str> {
+    fn extract_boolean_or_null(&self, index: usize) -> Option<&'a str> {
         let slice = self.source.get(index..)?;
         if slice.get(..4)? == "true" {
             return Some("true");
@@ -199,6 +202,7 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
+/// Returns tokens corresponding to the source.
 pub fn tokenize<'a>(
     source: &'a str,
     filepath: String,

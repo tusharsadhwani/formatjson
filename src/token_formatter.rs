@@ -1,7 +1,12 @@
+//! Contains the token formatter struct, which consumes and formats tokens.
 use crate::tokenizer;
 
-const INDENT: &str = "  ";
+/// Formatter uses 2 space indents.
+pub const INDENT: &str = "  ";
 
+/// Token formatter struct. The iterator yields formatted tokens.
+///
+/// Check [TokenFormatter::next] for formatting rules.
 pub struct TokenFormatter<T> {
     pub tokens: T,
     indent_level: usize,
@@ -25,6 +30,14 @@ where
 {
     type Item = String;
 
+    /// Formats each token, based on the following rules:
+    /// - Before every closing bracket and brace, decrease indent level by 1,
+    ///   and write a newline and the current indent.
+    /// - Write the token itself, trimmed of whitespace.
+    /// - After every colon, write a space.
+    /// - After every comma, write a newline.
+    /// - After every closing bracket and brace, increase indent level by 1,
+    ///   and write a newline and current indent.
     fn next(&mut self) -> Option<Self::Item> {
         let token = self.tokens.next()?;
 
