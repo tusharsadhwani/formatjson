@@ -1,8 +1,8 @@
 [package]
 name = "formatjson"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
-description = "🧛 Count-ing lines, AH AH AHH!"
+description = "Formats JSON files"
 authors = ["Tushar Sadhwani <tushar.sadhwani000@gmail.com>"]
 license-file = "LICENSE"
 documentation = "https://docs.rs/formatjson"
