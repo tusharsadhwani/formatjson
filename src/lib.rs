@@ -3,6 +3,31 @@
 //! The `formatjson` command is available as a binary, which reads and formats
 //! JSON files in-place, and library functions are available to use or extend
 //! the functionality.
+//!
+//! # Examples
+//!
+//! - As a command-line tool:
+//!
+//!   ```console
+//!   $ formatjson example.json
+//!   Successfully formatted example.json
+//!   ```
+//!
+//! - As a library:
+//!
+//!   ```rust
+//!   fn main() {
+//!       let json = formatjson::format_json(r#"{"foo":"bar"}"#).unwrap();
+//!       println!("{}", json);
+//!   }
+//!   ```
+//!
+//!   ```console
+//!   $ cargo run
+//!   {
+//!     "foo": "bar"
+//!   }
+//!   ```
 
 use std::{
     fs,
