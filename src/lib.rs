@@ -40,8 +40,8 @@ pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
 /// Returns a new, formatted JSON string.
 ///
 /// Throws a [FormatJsonError] on invalid syntax.
-pub fn format_json(contents: &str, filepath: &str) -> Result<String, FormatJsonError> {
-    let tokens = tokenizer::tokenize(contents, filepath.to_string())?;
+pub fn format_json(contents: &str) -> Result<String, FormatJsonError> {
+    let tokens = tokenizer::tokenize(contents, "<string>".to_string())?;
     let mut formatted_string: String = TokenFormatter::new(tokens.into_iter()).collect();
     formatted_string.push('\n');
     return Ok(formatted_string);
