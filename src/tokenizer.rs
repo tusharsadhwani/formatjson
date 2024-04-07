@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{FormatJsonError, InvalidSyntax};
+use crate::errors;
 
 #[derive(Debug)]
 pub enum TokenType<'a> {
@@ -50,18 +50,20 @@ impl<'a> Tokenizer<'a> {
         Self { source, filepath }
     }
 
-    fn tokenize(&mut self) -> Result<Vec<Token<'a>>, FormatJsonError> {
+    fn tokenize(&mut self) -> Result<Vec<Token<'a>>, errors::FormatJsonError> {
         let mut chars = self.source.char_indices();
         let mut tokens = vec![];
 
         while let Some((byte_offset, char)) = chars.next() {
             // special cases first: strings and numbers
             if char == '"' {
-                let string_token = self.extract_string(byte_offset).ok_or(InvalidSyntax::new(
-                    self.filepath.to_string(),
-                    self.source,
-                    byte_offset.into(),
-                ))?;
+                let string_token =
+                    self.extract_string(byte_offset)
+                        .ok_or(errors::InvalidSyntax::new(
+                            self.filepath.to_string(),
+                            self.source,
+                            byte_offset.into(),
+                        ))?;
                 tokens.push(Token {
                     token_type: TokenType::String(string_token),
                     byte_offset,
@@ -72,11 +74,13 @@ impl<'a> Tokenizer<'a> {
                 chars.nth(string_token.chars().count() - 2);
                 continue;
             } else if let '1'..='9' | '-' = char {
-                let number_token = self.extract_number(byte_offset).ok_or(InvalidSyntax::new(
-                    self.filepath.to_string(),
-                    self.source,
-                    byte_offset.into(),
-                ))?;
+                let number_token =
+                    self.extract_number(byte_offset)
+                        .ok_or(errors::InvalidSyntax::new(
+                            self.filepath.to_string(),
+                            self.source,
+                            byte_offset.into(),
+                        ))?;
                 tokens.push(Token {
                     token_type: TokenType::Number(number_token),
                     byte_offset,
@@ -89,7 +93,7 @@ impl<'a> Tokenizer<'a> {
             } else if "tfn".contains(char) {
                 let special_token =
                     self.extract_boolean_or_null(byte_offset)
-                        .ok_or(InvalidSyntax::new(
+                        .ok_or(errors::InvalidSyntax::new(
                             self.filepath.to_string(),
                             self.source,
                             byte_offset.into(),
@@ -136,11 +140,13 @@ impl<'a> Tokenizer<'a> {
                     byte_offset,
                 })
             } else {
-                return Err(FormatJsonError::InvalidSyntax(InvalidSyntax::new(
-                    self.filepath.to_string(),
-                    self.source,
-                    byte_offset.into(),
-                )));
+                return Err(errors::FormatJsonError::InvalidSyntax(
+                    errors::InvalidSyntax::new(
+                        self.filepath.to_string(),
+                        self.source,
+                        byte_offset.into(),
+                    ),
+                ));
             }
         }
         Ok(tokens)
@@ -193,6 +199,9 @@ impl<'a> Tokenizer<'a> {
     }
 }
 
-pub fn tokenize<'a>(source: &'a str, filepath: String) -> Result<Vec<Token<'a>>, FormatJsonError> {
+pub fn tokenize<'a>(
+    source: &'a str,
+    filepath: String,
+) -> Result<Vec<Token<'a>>, errors::FormatJsonError> {
     Tokenizer::new(source, filepath).tokenize()
 }
