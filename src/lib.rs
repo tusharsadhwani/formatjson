@@ -16,10 +16,28 @@ pub enum FormatJsonError {
     FileNotFound(String),
     #[error("{0}")]
     IOError(#[from] io::Error),
-    #[error("Invalid syntax on byte {0} ({1:?})")]
-    InvalidSyntax(usize, char),
+    #[error("{0}")]
+    InvalidSyntax(#[from] InvalidSyntax),
     #[error("{0}")]
     Unknown(String),
+}
+
+#[derive(Error, Debug, miette::Diagnostic)]
+#[error("Invalid JSON syntax")]
+pub struct InvalidSyntax {
+    #[source_code]
+    src: miette::NamedSource<String>,
+    #[label("Invalid JSON")]
+    bad_bit: miette::SourceSpan,
+}
+
+impl InvalidSyntax {
+    fn new(filepath: String, src: &str, bad_bit: miette::SourceSpan) -> Self {
+        Self {
+            src: miette::NamedSource::new(filepath, src.to_string()),
+            bad_bit,
+        }
+    }
 }
 
 pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
@@ -30,7 +48,7 @@ pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
         return FormatJsonError::Unknown(err.to_string());
     })?;
 
-    let tokens = tokenizer::tokenize(&json)?;
+    let tokens = tokenizer::tokenize(&json, filepath.to_string())?;
     let formatter = TokenFormatter::new(tokens.into_iter());
     let mut file = io::BufWriter::new(fs::File::create(filepath)?);
     for formatted_token in formatter {
@@ -40,8 +58,8 @@ pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
     Ok(())
 }
 
-pub fn format_json(contents: &str) -> Result<String, FormatJsonError> {
-    let tokens = tokenizer::tokenize(contents)?;
+pub fn format_json(contents: &str, filepath: &str) -> Result<String, FormatJsonError> {
+    let tokens = tokenizer::tokenize(contents, filepath.to_string())?;
     let mut formatted_string: String = TokenFormatter::new(tokens.into_iter()).collect();
     formatted_string.push('\n');
     return Ok(formatted_string);
