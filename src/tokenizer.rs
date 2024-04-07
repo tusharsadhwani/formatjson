@@ -69,7 +69,7 @@ impl<'a> Tokenizer<'a> {
                 // consume the extra tokens, till the end of the string.
                 // we don't need a length check, because a string will always be
                 // at least 2 in len().
-                chars.nth(string_token.len() - 2);
+                chars.nth(string_token.chars().count() - 2);
                 continue;
             } else if let '1'..='9' | '-' = char {
                 let number_token = self.extract_number(byte_offset).ok_or(InvalidSyntax::new(
@@ -99,7 +99,7 @@ impl<'a> Tokenizer<'a> {
                     byte_offset,
                 });
                 // consume the extra tokens, till the end of the number
-                chars.nth(special_token.len() - 2);
+                chars.nth(special_token.chars().count() - 2);
                 continue;
             }
 
@@ -147,14 +147,15 @@ impl<'a> Tokenizer<'a> {
     }
 
     fn extract_string(&mut self, index: usize) -> Option<&'a str> {
-        let mut chars = self.source.bytes().enumerate().skip(index + 1);
+        let slice = self.source.get(index + 1..)?;
+        let mut chars = slice.char_indices();
         while let Some((i, char)) = chars.next() {
-            if char == b'\\' {
+            if char == '\\' {
                 // skip the next character
                 chars.next();
-            } else if char == b'"' {
+            } else if char == '"' {
                 // found the closing quote. Return string.
-                return Some(&self.source[index..=i]);
+                return Some(&self.source[index..=index + 1 + i]);
             }
         }
 
