@@ -1,10 +1,10 @@
 [package]
 name = "formatjson"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Formats JSON files"
 authors = ["Tushar Sadhwani <tushar.sadhwani000@gmail.com>"]
-license-file = "LICENSE"
+license = "MIT"
 documentation = "https://docs.rs/formatjson"
 homepage = "https://github.com/tusharsadhwani/formatjson"
 repository = "https://github.com/tusharsadhwani/formatjson"
