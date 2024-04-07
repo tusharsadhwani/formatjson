@@ -2,8 +2,14 @@
 name = "formatjson"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "🧛 Count-ing lines, AH AH AHH!"
+authors = ["Tushar Sadhwani <tushar.sadhwani000@gmail.com>"]
+license-file = "LICENSE"
+documentation = "https://docs.rs/formatjson"
+homepage = "https://github.com/tusharsadhwani/formatjson"
+repository = "https://github.com/tusharsadhwani/formatjson"
+keywords = ["formatting", "json"]
+categories = ["command-line-utilities", "text-processing"]
 
 [dependencies]
 miette = { version = "7.2.0", features = ["fancy"] }
