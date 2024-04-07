@@ -76,7 +76,7 @@ impl<'a> Tokenizer<'a> {
                 // at least 2 in len().
                 chars.nth(string_token.chars().count() - 2);
                 continue;
-            } else if let '1'..='9' | '-' = char {
+            } else if let '0'..='9' | '-' = char {
                 let number_token = self.extract_number(byte_offset).ok_or(
                     errors::InvalidSyntaxDiagnostic::new(
                         self.filepath.to_string(),
@@ -175,7 +175,7 @@ impl<'a> Tokenizer<'a> {
         let slice = self.source.get(index + 1..)?;
         slice
             .find(|char| {
-                if let '1'..='9' | '-' | '.' | 'e' | 'E' = char {
+                if let '0'..='9' | '-' | '.' | 'e' | 'E' = char {
                     return false;
                 }
                 // unknown character: found the end of the number

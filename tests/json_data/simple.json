@@ -3,5 +3,5 @@
   "baz": [1, 2, 34, false, { "x": "long string with\t\"a \nfew escapes.\\" }],
   "specials": [true, false, null, { "": "" }],
   "light_speed": 2.997e8,
-  "million": 1e6
+  "million": 10e5
 }
