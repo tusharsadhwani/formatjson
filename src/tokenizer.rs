@@ -4,7 +4,7 @@ use std::fmt::Display;
 use crate::errors;
 
 /// The kinds of tokens produced by the tokenizer.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenType<'a> {
     String(&'a str),
     Number(&'a str),
@@ -62,9 +62,10 @@ impl<'a> Tokenizer<'a> {
             if char == '"' {
                 let string_token = self.extract_string(byte_offset).ok_or(
                     errors::InvalidSyntaxDiagnostic::new(
-                        self.filepath.to_string(),
+                        &self.filepath,
                         self.source,
                         byte_offset.into(),
+                        "Expected end of string".to_string(),
                     ),
                 )?;
                 tokens.push(Token {
@@ -79,9 +80,10 @@ impl<'a> Tokenizer<'a> {
             } else if let '1'..='9' | '-' = char {
                 let number_token = self.extract_number(byte_offset).ok_or(
                     errors::InvalidSyntaxDiagnostic::new(
-                        self.filepath.to_string(),
+                        &self.filepath,
                         self.source,
                         byte_offset.into(),
+                        "Expected number token".to_string(),
                     ),
                 )?;
                 tokens.push(Token {
@@ -96,9 +98,10 @@ impl<'a> Tokenizer<'a> {
             } else if "tfn".contains(char) {
                 let special_token = self.extract_boolean_or_null(byte_offset).ok_or(
                     errors::InvalidSyntaxDiagnostic::new(
-                        self.filepath.to_string(),
+                        &self.filepath,
                         self.source,
                         byte_offset.into(),
+                        "Expected true, false, or null".to_string(),
                     ),
                 )?;
                 tokens.push(Token {
@@ -145,9 +148,10 @@ impl<'a> Tokenizer<'a> {
             } else {
                 return Err(errors::FormatJsonError::InvalidSyntax(
                     errors::InvalidSyntaxDiagnostic::new(
-                        self.filepath.to_string(),
+                        &self.filepath,
                         self.source,
                         byte_offset.into(),
+                        "Unexpected token".to_string(),
                     ),
                 ));
             }
