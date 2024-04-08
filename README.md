@@ -1,6 +1,6 @@
 # formatjson
 
-A simple JSON formatter written in Rust.
+A simple JSON validator and formatter written in Rust.
 
 For documentation check [the docs.rs page](https://docs.rs/formatjson).
 
