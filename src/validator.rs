@@ -81,7 +81,7 @@ pub fn validate(tokens: &[Token]) -> Result<(), ValidationError> {
     Ok(())
 }
 
-pub fn validate_recursive<'a>(tokens: &mut TokenIterator) -> Result<(), ValidationError> {
+fn validate_recursive<'a>(tokens: &mut TokenIterator) -> Result<(), ValidationError> {
     if let Some(token) = tokens.next() {
         match token.token_type {
             TokenType::RightBracket
