@@ -40,19 +40,33 @@ use token_formatter::TokenFormatter;
 pub mod errors;
 pub mod token_formatter;
 pub mod tokenizer;
+pub mod validator;
 
 /// Reads, formats, and overwrites the given JSON file.
 ///
 /// Throws a [FormatJsonError] on invalid syntax, or failing to read/write the file.
 pub fn format_json_file(filepath: &str) -> Result<(), FormatJsonError> {
-    let json = fs::read_to_string(&filepath).map_err(|err| {
+    let source = fs::read_to_string(&filepath).map_err(|err| {
         if err.kind() == io::ErrorKind::NotFound {
             return FormatJsonError::FileNotFound(filepath.to_string());
         }
         return FormatJsonError::Unknown(err.to_string());
     })?;
 
-    let tokens = tokenizer::tokenize(&json, filepath.to_string())?;
+    let tokens = tokenizer::tokenize(&source, filepath.to_string())?;
+
+    // validate the tokens before formatting them.
+    if let Err(error) = validator::validate(&tokens) {
+        return Err(FormatJsonError::InvalidSyntax(
+            errors::InvalidSyntaxDiagnostic::new(
+                filepath,
+                &source,
+                error.byte_offset().into(),
+                error.to_string(),
+            ),
+        ));
+    };
+
     let formatter = TokenFormatter::new(tokens.into_iter());
     let mut file = io::BufWriter::new(fs::File::create(filepath)?);
     for formatted_token in formatter {

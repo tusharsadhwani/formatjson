@@ -22,19 +22,26 @@ pub enum FormatJsonError {
 
 /// Creates a [miette::Diagnostic] pointing at an invalid JSON syntax.
 #[derive(Error, Debug, miette::Diagnostic)]
-#[error("Invalid JSON syntax")]
+#[error("{error_message}")]
 pub struct InvalidSyntaxDiagnostic {
     #[source_code]
     src: miette::NamedSource<String>,
-    #[label("Invalid JSON")]
+    #[label("Error here")]
     bad_bit: miette::SourceSpan,
+    error_message: String,
 }
 
 impl InvalidSyntaxDiagnostic {
-    pub fn new(filepath: String, src: &str, bad_bit: miette::SourceSpan) -> Self {
+    pub fn new(
+        filepath: &str,
+        src: &str,
+        bad_bit: miette::SourceSpan,
+        error_message: String,
+    ) -> Self {
         Self {
             src: miette::NamedSource::new(filepath, src.to_string()),
             bad_bit,
+            error_message,
         }
     }
 }
