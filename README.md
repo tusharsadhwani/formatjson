@@ -17,6 +17,10 @@ cargo install formatjson
   ```console
   $ formatjson example.json
   Successfully formatted example.json
+  $ echo '{"foo": "bar"}' | formatjson
+  {
+    "foo": "bar"
+  }
   ```
 
 - As a library:
