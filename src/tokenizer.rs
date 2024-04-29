@@ -60,14 +60,14 @@ impl<'a> Tokenizer<'a> {
         while let Some((byte_offset, char)) = chars.next() {
             // special cases first: strings and numbers
             if char == '"' {
-                let string_token = self.extract_string(byte_offset).ok_or(
+                let string_token = self.extract_string(byte_offset).ok_or_else(|| {
                     errors::InvalidSyntaxDiagnostic::new(
                         &self.filepath,
                         self.source,
                         byte_offset.into(),
                         "Expected end of string".to_string(),
-                    ),
-                )?;
+                    )
+                })?;
                 tokens.push(Token {
                     token_type: TokenType::String(string_token),
                     byte_offset,
@@ -78,14 +78,14 @@ impl<'a> Tokenizer<'a> {
                 chars.nth(string_token.chars().count() - 2);
                 continue;
             } else if let '0'..='9' | '-' = char {
-                let number_token = self.extract_number(byte_offset).ok_or(
+                let number_token = self.extract_number(byte_offset).ok_or_else(|| {
                     errors::InvalidSyntaxDiagnostic::new(
                         &self.filepath,
                         self.source,
                         byte_offset.into(),
                         "Expected number token".to_string(),
-                    ),
-                )?;
+                    )
+                })?;
                 tokens.push(Token {
                     token_type: TokenType::Number(number_token),
                     byte_offset,
@@ -96,14 +96,14 @@ impl<'a> Tokenizer<'a> {
                 }
                 continue;
             } else if "tfn".contains(char) {
-                let special_token = self.extract_boolean_or_null(byte_offset).ok_or(
+                let special_token = self.extract_boolean_or_null(byte_offset).ok_or_else(|| {
                     errors::InvalidSyntaxDiagnostic::new(
                         &self.filepath,
                         self.source,
                         byte_offset.into(),
                         "Expected true, false, or null".to_string(),
-                    ),
-                )?;
+                    )
+                })?;
                 tokens.push(Token {
                     token_type: TokenType::Number(special_token),
                     byte_offset,
