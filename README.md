@@ -60,3 +60,5 @@ Checking formatting...
 [warn] Code style issues found in the above file. Run Prettier to fix.
 npx prettier --check large.json  26.14s user 11.57s system 246% cpu 15.279 total
 ```
+
+[1]: https://raw.githubusercontent.com/json-iterator/test-data/master/large-file.json
