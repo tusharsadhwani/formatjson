@@ -51,7 +51,7 @@ Benchmark 1: formatjson large.json
 ```
 
 Averaging 400 milliseconds on my M1 MacBook Air, which is about 38 times faster
-than pretter, which took 15.27 seconds:
+than prettier, which took 15.27 seconds:
 
 ```console
 $ time npx prettier --check large.json
