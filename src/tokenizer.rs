@@ -170,6 +170,11 @@ impl<'a> Tokenizer<'a> {
                 // found the closing quote. Return string.
                 let end_quote_index = index + 1 + i;
                 return Some(&self.source[index..=end_quote_index]);
+            } else if char <= '\u{001f}' {
+                // Control characters (U+0000–U+001F), e.g. a literal newline,
+                // must be escaped inside a JSON string. An unescaped one means
+                // the string is invalid, so bail out.
+                return None;
             }
         }
 
