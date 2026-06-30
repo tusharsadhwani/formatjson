@@ -1,6 +1,7 @@
 use formatjson::{
     tokenizer::tokenize,
     validator::{validate, ValidationError},
+    FormatJsonError,
 };
 
 #[test]
@@ -31,6 +32,25 @@ fn extra_data() {
         validate(&tokens).expect_err("Expected validate to fail"),
         ValidationError::UnexpectedToken(_, _)
     ));
+}
+
+#[test]
+fn unescaped_newline_in_string() {
+    // A literal (unescaped) newline inside a string is invalid JSON; it must
+    // be written as "\n". See https://github.com/tusharsadhwani/formatjson/issues/4
+    let bad = "{\n  \"test string\": \"\n  \"\n}";
+    assert!(matches!(
+        tokenize(bad, "<source>".into()).expect_err("Expected tokenize to fail"),
+        FormatJsonError::InvalidSyntax(_)
+    ));
+}
+
+#[test]
+fn escaped_newline_in_string() {
+    // The escaped form is valid.
+    let good = r#"{"test string": "\n"}"#;
+    let tokens = tokenize(good, "<source>".into()).unwrap();
+    validate(&tokens).expect("Expected validate to pass");
 }
 
 #[test]
